@@ -1,513 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <!-- LINK CSS BOOTSTRAP -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-  <!-- LINK CSS -->
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mis Finanzas PWA</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e293b">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* Ajustes para evitar rebote en iOS y scroll suave */
+        body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
+<body class="bg-slate-100 text-slate-800 h-screen w-screen overflow-hidden font-sans">
 
-<body>
+    <div id="root"></div>
 
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-  <!-- SECCIÓN DEL HEADER -->
+        // --- Componentes ---
 
-  <div class="header">
-    <div class="headerEncabezado">
-      <p>Para consultas te redirigimos a nuestro formulario <a class="colorLink" href="pages/contacto.html">CLICK AQUÍ</a></p>
-    </div>
-  </div>
-
-
-  <!-- SECCIÓN DEL INICIO -->
-
-  <div class="boxInicio">
-
-    <div class="divImg">
-
-      <div class="header">
-
-        <div class="headerNavbar">
-          <div class="imgNav"></div>
-          <ul class="ulNavbar">
-            <li class="liNavbar">Inicio</li>
-            <li class="liNavbar">Nuestros Servicios</li>
-            <li class="liNavbar">Quienes Somos</li>
-            <li class="liNavbar">Contacto</li>
-            <li class="liImgNavbar"><a class="link-light" href="https://www.facebook.com/camarasancarlos.mza"
-                target="_blank">
-                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
-                  class="bi bi-facebook" viewBox="0 0 16 16">
-                  <path
-                    d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z" />
-                </svg></a></li>
-            <li class="liImgNavbar"><a class="link-light" href="https://www.instagram.com/camarasancarlos_mza/"
-                target="_blank">
-                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
-                  class="bi bi-instagram" viewBox="0 0 16 16">
-                  <path
-                    d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334" />
-                </svg></a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="textoHeader">
-        <h1 class="h1Inicio"> Cámara de Turismo, Comercio, Industria y Producción de San Carlos.</h1>
-        <p class="pInicio">Promotores del crecimiento y regulación del sector turístico en el area de San Carlos</p>
-      </div>
-    </div>
-
-  </div>
-
-<!-- PRUEBA -->
-
-  <div class="row headerEncabezado footerStyle1 producto" style="margin-left: 0px;margin-right: 0px;">
-
-    <div class="col-lg-1 ">
-      <img src="img/Logo-90x90---Blanco-y-amarillo.png" alt="logo" class="img-fluid rounded float-start">
-    </div>
-
-    <div class="col-lg-10   list-unstyled" style="padding-left: 500px;">
-      <ul class="list-inline" style="margin-left: 20px;">
-        <li class="list-inline-item">
-          <a class=" fs-5 me-md-2 link-light" href="../index.html">Inicio</a>
-        </li>
-        <li class="list-inline-item">
-          <a class=" fs-5 me-md-2 link-light" href="#servicios">Servicios</a>
-        </li>
-        <li class="list-inline-item">
-          <a class=" fs-5 me-md-2 link-light" href="#quienesSomos">Quiénes somos</a>
-        </li>
-        <li class="list-inline-item">
-          <a class=" fs-5 me-md-2 link-light" href="pages/contacto.html">Contacto</a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="col-lg-1   list-unstyled">
-      <a class="link-light" href="https://www.facebook.com/camarasancarlos.mza" target="_blank">
-        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-facebook"
-          viewBox="0 0 16 16">
-          <path
-            d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z" />
-        </svg></a>
-
-      <a class="link-light" href="https://www.instagram.com/camarasancarlos_mza/" target="_blank">
-        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-instagram"
-          viewBox="0 0 16 16">
-          <path
-            d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334" />
-        </svg></a>
-    </div>
-  </div>
-  <!-- SECCIÓN DE SERVICIOS -->
-
-  <div id="servicios" class="boxServicios container">
-
-    <div class="boxTitulo">
-      <div class="barServ"></div>
-      <h2 class="tituloServ">Nuestros Servicios</h2>
-    </div>
-
-    <div class="boxArticulosServicios">
-
-      <article class="card mb-3 articuloServicios" style="max-width: 80rem;">
-        <div class="row box g-0">
-          <div class="col-md-4 imgCard">
-            <img src="./img/capacitaciones.jpg" class="img-fluid rounded-start" alt="...">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body divCard">
-              <h5 class="card-title">Capacitaciones</h5>
-              <p class="card-text">Mes a mes ofrecemos una amplia variedad de oferta educativa para que los emprendedores puedan seguir desarrollando sus habilidades y conocimientos, con el objetivo de mejorar su capacidad, productividad y rendimiento.</p>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <article class="card mb-3 articuloServicios" style="max-width: 80rem;">
-        <div class="row box g-0">
-          <div class="col-md-4 imgCard">
-            <img src="./img/asesoramiento.jpg" class="img-fluid rounded-start" alt="...">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body divCard">
-              <h5 class="card-title">Asesoramiento</h5>
-              <p class="card-text">Brindamos asesoramiento profesional, mediante una primera consulta gratuita, a los emprendedores que lo necesiten para resolver situaciones de índole legal, contable o técnica.
-              Agendá tu asesoría <a class="colorLink" href="pages/contacto.html">AQUÍ</a></p>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <article class="card mb-3 articuloServicios" style="max-width: 80rem;">
-        <div class="row box g-0">
-          <div class="col-md-4 imgCard">
-            <img src="./img/contable - legal.jpg" class="img-fluid rounded-start" alt="...">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body divCard">
-              <h5 class="card-title">Contable - Legal</h5>
-              <p class="card-text">Brindamos servicios enfocados especificamente en el plano legal de la mano de profesionales en el área.</p>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <article class="card mb-3 articuloServicios" style="max-width: 80rem;">
-        <div class="row box g-0">
-          <div class="col-md-4 imgCard">
-            <img src="./img/idiomas.jpg" class="img-fluid rounded-start" alt="...">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body divCard">
-              <h5 class="card-title">Diagnóstico</h5>
-              <p class="card-text">Ayudamos a aquellos emprendedores que tengan un proyecto y que buscan desarrollar en detalle su plan de negocios, con el objetivo de fortalecer la calidad de su emprendimiento en su etapa más temprana.</p>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <article class="card mb-3 articuloServicios" style="max-width: 80rem;">
-        <div class="row box g-0">
-          <div class="col-md-4 imgCard">
-            <img src="./img/imagenes talleres.jpg" class="img-fluid rounded-start" alt="...">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body divCard">
-              <h5 class="card-title">Talleres</h5>
-              <p class="card-text">Brindamos diversos encuentros prácticos que abordan un tema específico, como por ejemplo Marketing Digital, Atención al Cliente, Gestión de redes sociales, entre otras, para potenciar tu negocio
-                Encontrá toda la programación en <a class="colorLink" href="https://www.facebook.com/camarasancarlos.mza">facebook</a> e <a class="colorLink"
-                href="https://www.instagram.com/camarasancarlos_mza/">Instagram </a>.</p>
-            </div>
-          </div>
-          <div class="margen"></div>
-        </div>
-      </article>
-    </div>
-
-    <div class="boxMensaje">
-      <article class="mensajeServ">
-        <p>Seguinos en <a class="colorLink" href="https://www.facebook.com/camarasancarlos.mza">facebook</a> o <a class="colorLink"
-            href="https://www.instagram.com/camarasancarlos_mza/">Instagram </a>para mantenerte en informando sobre
-          nuestras actuales propuestas.</p>
-      </article>
-    </div>
-
-  </div>
-
-
-  <!--   =====================================================================================   -->
-
-
- <!-- EL SCROLLSPY  
-
-  <nav id="navbar-example2" class="navbar bg-light px-3 mb-3">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <ul class="nav nav-pills">
-      <li class="nav-item">
-        <a class="nav-link" href="#scrollspyHeading1">First</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#scrollspyHeading2">Second</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Dropdown</a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#scrollspyHeading3">Third</a></li>
-          <li><a class="dropdown-item" href="#scrollspyHeading4">Fourth</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#scrollspyHeading5">Fifth</a></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
-  <div data-bs-spy="scroll" data-bs-target="#navbar-example2" data-bs-root-margin="0px 0px -40%" data-bs-smooth-scroll="true" class="scrollspy-example bg-light p-3 rounded-2" tabindex="0">
-    <h4 id="scrollspyHeading1">First heading</h4>
-    <p>...</p>
-    <h4 id="scrollspyHeading2">Second heading</h4>
-    <p>...</p>
-    <h4 id="scrollspyHeading3">Third heading</h4>
-    <p>...</p>
-    <h4 id="scrollspyHeading4">Fourth heading</h4>
-    <p>...</p>
-    <h4 id="scrollspyHeading5">Fifth heading</h4>
-    
-  -->
- 
-  
-<!-- LO PRIMERO QUE ABRIMOS ES UN CONTAINER -->
-<div class="container-fluid" style="margin-right: 0px;margin-left: 0px;padding-left: 0px;padding-right: 0px;">
-
-<main>
-
-
-
-
-<!-- TECERA SECCION A MODO DE EJEMPLO QUIENES SOMOS -->
-<!-- NUEVA ROW -->
-<div  id="quienesSomos" class="row" style="margin-right: 0px;margin-left: 0px;">
-  <div class="col-lg-12" style="padding-left: 0px;padding-right: 0px;padding-top: 0px;">
-<div class="boxInicio">
-
-<!-- ULTIMO AGREGADO LA CLASE "divImg2" -->
-<div class="divImg2">
-    <h1 class="h1Inicio p1" style="margin-bottom: 0px; padding-bottom: 80px; ">| <b>Quiénes Somos</b></h1>
-</div>
-</div>
-
-</div>
-</div>
-
-<div class="row" style="margin-right: 0px;margin-left: 0px;">
-  <div class="col-lg-12" style="padding-left: 0px;padding-right: 0px;">
-<div class="card text-white verdeOscuro mb-3">
-  <div class="card-body">
-
-  <!-- ULTIMO AGREGADO LA CLASE  card-text y text-white -->
-    <h5 class="card-text text-white " style="padding-left: 65px;padding-right: 65px; padding-top: 30px;padding-bottom: 30px">Somos la <b>Cámara de Turismo, Comercio, Industria y Produccción de San  Carlos</b>, úbicado en la provincia de Mendoza. San Carlos es uno de los tres departamentos del Valle del Uco, junto a Tunuyán y Tupungato. Nosotros promovemos el crecimento y regulación del sector turístico en el area de San Carlos mediante prestaciones de servicios.
-    Nuestra Cámara se presentó legalmente en DJP (dirección de personas jurídicas) el 2 de octubre del 2023.
-    <br>Nuestro objetivo principal es el nexo de las áreas que conforman la Cámara y las disversas instituciones que proveen servicios en la región.</h5>
-    
-  </div>
-</div>
-</div>
-</div>
-<!-- NUEVA ROW -->
-<div class="row" style="margin-right: 0px;margin-left: 0px;padding-left: 40px;">
-    <div class="col-lg-12  p-4" style="margin-left: 0px;">
-        <h1 class="fs-1  m-3 border-bottom border-dark">Nuestras funciones principales son: </h1>
-    </div>
-</div>
-
-<!-- NUEVA ROW -->
-<div class="row bg-principal justify-content-center" style="margin-left: 0px;margin-right: 0px;padding-left: 80px;padding-right: 80px;margin-bottom: 50px;margin-left: 0px;">
-
-    <div class="col-lg-4" style="padding-left: 40px;">
-        <div class="card text-white verdeOscuro mb-3 p-4" style="max-width: 20rem;">
-            
-                <img src="img/briefcase.svg" alt="logo" class="img-fluid rounded float-start" width="100" height="100" style="margin-left: 80px;">
-                
-              <div class="card-body" style="margin-bottom: 0px;padding-top: 30px;">
-              <h5 class="card-title text-center">
-                <a class="fs-5 me-md-2 link-light" href="#" >Prestación de servicios</a>
-                
-              </h5>
-              
-            </div>
-          </div>
-    </div>
-
-    <div class="col-lg-4" style="padding-left: 40px;">
-        <div class="card text-white verdeOscuro mb-3 p-4" style="max-width: 20rem;">
-            
-            <img src="img/SVGRepo_iconCarrier(1).svg" alt="logo" class="img-fluid rounded float-start" width="100" height="100" style="margin-left: 80px;">
-
-            <div class="card-body" style="margin-bottom: 0px;padding-top: 40px;padding-bottom: 3px;">
-              <h5 class="card-title text-center">
-                <a class="fs-5 me-md-2 link-light" href="#" >Capacitación a personas del sector</a>
-              </h5>
-              
-            </div>
-          </div>
-    </div>
-
-    <div class="col-lg-4" style="padding-left: 40px;">
-        <div class="card text-white verdeOscuro mb-3 p-4" style="max-width: 20rem;">
-            
-            <img src="img/building-store.svg" alt="logo" class="img-fluid rounded float-start" width="100" height="100" style="margin-left: 80px;">
-            <div class="card-body" style="padding-bottom: 0px;">
-              <h5 class="card-title text-center">
-                <a class="fs-5 me-md-2 link-light" href="#" >Promoción de emprendimientos locales</a>
-              </h5>
-              
-            </div>
-          </div>
-    </div>
-
-</div>
- 
-
-<!-- NUEVA ROW -->
-
-<!-- ULTIMO AGREGADO EN STYLE margin-bottom:40px -->
-<div class="row bg-principal justify-content-center  " style="margin-left: 0px;margin-right: 0px;padding-left:0px;padding-right:0;margin-left: 0px; margin-bottom: 40px;">
-
- <div class="col-lg-4 border border-white" style="padding-right: 0px;padding-left: 0px;">
-    
-    <div class="card text-white">
-        <img src="./img/img1.jpg" class="card-img" alt="...">
-        <div class="card-img-overlay" style="padding-left: 0px;padding-right: 0px;">
-            <p class="fs-4   text-center " style="margin-bottom: 2px;"> <b>Misión</b></p>
-            <ul class="fs-5  ">
-                <li>
-                    <p><b>.</b> Fomentar la agremiación amplia y libre de emprendedores de los distintos rubros.</p>
-                </li>
-                <li>
-                    <p><b>.</b> Fortalecer los vínculos institucionales del sector privado con el Estado municipal, provincial y nacional.</p>
-                </li>
-                <li>
-                    <p><b>.</b> Ofrecer diferentes capacitaciones en cada sector que integra la Cámara.
-                    </p>
-                </li>
-                <li>
-                    <p><b>.</b> Dar difusión de todas las actividades que se realicen a través de diferentes medios de comunicación.
-                    </p>
+        const CardBalance = ({ income, expense }) => {
+            const total = income - expense;
+            return (
+                <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-blue-500 rounded-full opacity-20 blur-xl"></div>
+                    <p className="text-slate-400 text-sm font-medium mb-1">Saldo Total</p>
+                    <h1 className="text-4xl font-bold mb-6">${total.toLocaleString('es-AR')}</h1>
                     
-                </li>
-            </ul>
-        </div>
-      </div>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <div className="flex items-center gap-1 text-emerald-400 mb-1">
+                                <i className="ph-fill ph-arrow-circle-down text-lg"></i>
+                                <span className="text-xs font-bold uppercase tracking-wider">Ingresos</span>
+                            </div>
+                            <p className="font-semibold text-lg">${income.toLocaleString('es-AR')}</p>
+                        </div>
+                        <div className="w-px h-8 bg-slate-600"></div>
+                        <div className="text-right">
+                            <div className="flex items-center justify-end gap-1 text-rose-400 mb-1">
+                                <span className="text-xs font-bold uppercase tracking-wider">Gastos</span>
+                                <i className="ph-fill ph-arrow-circle-up text-lg"></i>
+                            </div>
+                            <p className="font-semibold text-lg">${expense.toLocaleString('es-AR')}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-</div>
+        const TransactionItem = ({ item, onDelete }) => {
+            const isIncome = item.type === 'ingreso';
+            return (
+                <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isIncome ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                            <i className={`ph-fill ${isIncome ? 'ph-money' : 'ph-shopping-cart'} text-xl`}></i>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-700">{item.category}</p>
+                            <p className="text-xs text-slate-400">{new Date(item.date).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className={`font-bold ${isIncome ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {isIncome ? '+' : '-'}${parseFloat(item.amount).toLocaleString('es-AR')}
+                        </span>
+                        <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                            <i className="ph ph-trash text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
 
-<div class="col-lg-4 border border-white" style="padding-right: 0px;padding-left: 0px;">
+        const AddModal = ({ isOpen, onClose, onAdd }) => {
+            if (!isOpen) return null;
+            const [amount, setAmount] = useState('');
+            const [category, setCategory] = useState('');
+            const [type, setType] = useState('gasto');
 
-    <div class="card text-white">
-        <img src="./img/img2.jpg" class="card-img" alt="...">
-        <div class="card-img-overlay" style="padding-left: 0px;padding-right: 0px;" >
-    
-    <p class="fs-4   text-center" style="margin-bottom: 2px;" > <b>Visión</b></p>
-    <ul class="fs-5   ">
-        <li>
-            <p><b>.</b> Favorecer el desarrollo del Departamento de San Carlos.
-            </p>
-        </li>
-        <li>
-            <p><b>.</b> Revalorizar la identidad cultural y el cuidado del medio ambiente, mejorando su calidad y sustentabilidad, para evitar todo tipo de contaminación. 
-            </p>
-        </li>
-        <li>
-            <p><b>.</b> Favorecer el arraigo al lugar, generando fuentes de trabajo que sirvan como desarrollo de diferentes grupos.
-            </p>
-        </li>
-    </ul>
-</div>
-</div>
-</div>
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!amount || !category) return;
+                onAdd({ amount: parseFloat(amount), category, type });
+                setAmount(''); setCategory(''); onClose();
+            };
 
-<div class="col-lg-4 border border-white" style="padding-right: 0px;padding-left: 0px;">
-    
-    <div class="card text-white">
-        <img src="./img/img3.jpg" class="card-img" alt="...">
-        <div class="card-img-overlay" style="padding-left: 0px;padding-right: 0px;" >  
+            return (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                        <h2 className="text-xl font-bold mb-4 text-slate-800">Nueva Transacción</h2>
+                        
+                        <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+                            <button onClick={() => setType('ingreso')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${type === 'ingreso' ? 'bg-white shadow text-emerald-600' : 'text-slate-500'}`}>Ingreso</button>
+                            <button onClick={() => setType('gasto')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${type === 'gasto' ? 'bg-white shadow text-rose-600' : 'text-slate-500'}`}>Gasto</button>
+                        </div>
 
-    <p class="fs-4   text-center" style="margin-bottom: 2px;"> <b>Valores</b></p>
-    <ul class="fs-5  ">
-        <li>
-            <p><b>.</b> Espíritu asociativo</p>
-        </li>
-        <li>
-            <p><b>.</b> Cooperación</p>
-        </li>
-        <li>
-            <p><b>.</b> Buenas prácticas</p>
-        </li>
-        <li>
-          <p><b>.</b> Desarrollo regionals</p>
-      </li>
-      <li>
-        <p><b>.</b> Sustentabilidad y cuidado ambiental
-        </p>
-    </li>
-    </ul>
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                            <div>
+                                <label className="text-xs text-slate-500 font-bold ml-2">Monto</label>
+                                <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none focus:ring-2 ring-blue-500/20" autoFocus />
+                            </div>
+                            <div>
+                                <label className="text-xs text-slate-500 font-bold ml-2">Concepto</label>
+                                <input type="text" value={category} onChange={e => setCategory(e.target.value)} placeholder="Ej: Supermercado" className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ring-blue-500/20" />
+                            </div>
+                            
+                            <div className="flex gap-3 mt-4">
+                                <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 rounded-xl">Cancelar</button>
+                                <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-800/20 active:scale-95 transition-transform">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
 
-</div>
-</div>
-</div>
-</div>
+        // --- App Principal ---
 
-<!-- CUARTA SECCION CONTACTO PAGINA APARTE -->
+        const App = () => {
+            // Estado inicial cargando desde LocalStorage
+            const [transactions, setTransactions] = useState(() => {
+                const saved = localStorage.getItem('financeApp_data');
+                return saved ? JSON.parse(saved) : [];
+            });
+            const [isModalOpen, setIsModalOpen] = useState(false);
 
-<div class="boxInicio ">
+            // Guardar en LocalStorage cada vez que cambian las transacciones
+            useEffect(() => {
+                localStorage.setItem('financeApp_data', JSON.stringify(transactions));
+            }, [transactions]);
 
-    
+            const addTransaction = (data) => {
+                const newTx = { ...data, id: Date.now(), date: new Date().toISOString() };
+                setTransactions([newTx, ...transactions]);
+            };
 
-    <div class="divCarrusel">
-      <div class="fs-1 border-bottom border-dark" style="margin-left: 71px;margin-bottom: 50px;margin-right: 45px;"><p style="margin-bottom: 0px;" >Nuestros asociados:</p></div>
-      
+            const deleteTransaction = (id) => {
+                setTransactions(transactions.filter(t => t.id !== id));
+            };
 
-      <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img src="./img/Marcas1.png" class="d-block w-100" alt="...">
-          </div>
-          <div class="carousel-item">
-            <img src="./img/Marcas-2.png" class="d-block w-100" alt="...">
-          </div>
-          <div class="carousel-item">
-            <img src="./img/Marcas-3.png" class="d-block w-100" alt="...">
-          </div>
-          <div class="carousel-item">
-            <img src="./img/Marcas-4.png" class="d-block w-100" alt="...">
-          </div>
-          <div class="carousel-item">
-            <img src="./img/Marcas-5.png" class="d-block w-100" alt="...">
-          </div>
-          <div class="carousel-item">
-            <img src="./img/Marcas-6.png" class="d-block w-100" alt="...">
-          </div>
-        </div>
-      </div>
-    </div>
+            const totalIncome = transactions.filter(t => t.type === 'ingreso').reduce((acc, curr) => acc + curr.amount, 0);
+            const totalExpense = transactions.filter(t => t.type === 'gasto').reduce((acc, curr) => acc + curr.amount, 0);
 
-  </div>
+            return (
+                <div className="h-full max-w-md mx-auto bg-white sm:border-x sm:border-slate-200 relative flex flex-col">
+                    
+                    {/* Header */}
+                    <header className="p-6 pb-2">
+                        <div className="flex justify-between items-center mb-6">
+                            <h1 className="text-2xl font-black text-slate-800">Mis Finanzas</h1>
+                            <button className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                                <i className="ph-fill ph-user"></i>
+                            </button>
+                        </div>
+                        <CardBalance income={totalIncome} expense={totalExpense} />
+                    </header>
 
-    </main>
+                    {/* Lista de Movimientos */}
+                    <div className="flex-1 overflow-y-auto px-6 pb-24 hide-scrollbar">
+                        <div className="flex justify-between items-end mb-4">
+                            <h3 className="font-bold text-slate-700 text-lg">Movimientos</h3>
+                            <span className="text-xs text-slate-400 font-medium">{transactions.length} registrados</span>
+                        </div>
+                        
+                        {transactions.length === 0 ? (
+                            <div className="text-center py-10 opacity-50">
+                                <i className="ph ph-receipt text-4xl mb-2 text-slate-300"></i>
+                                <p className="text-slate-400">No hay movimientos aún</p>
+                            </div>
+                        ) : (
+                            transactions.map(tx => (
+                                <TransactionItem key={tx.id} item={tx} onDelete={deleteTransaction} />
+                            ))
+                        )}
+                    </div>
 
-  </div> 
-    <!-- NUEVA ROW -->
-    <footer class="row bg-principal mt-5 p-2 justify-content-center footerStyle" style="margin-right: 0px;margin-right: 0px;margin-left: 0px;">
-        
-        <div class="col-lg-4 ">
-          <ul class="list-inline" style="margin-bottom: 1px; padding-top: 40px;padding-left: 10px; ">
-            <li class="list-inline-item">
-              <p class="fs-6  link-light" style="margin-bottom: 5px;" >Correo electrónico: camtipcsancarlos@gmail.com </p>
-              <p class="fs-6  link-light" style="margin-bottom: 5px;">Teléfono: 5492622276624</p>
-          </li>
-        </ul>
-       </div>
+                    {/* Botón Flotante (FAB) */}
+                    <div className="absolute bottom-6 right-6 z-10">
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-600/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                        >
+                            <i className="ph ph-plus text-3xl font-bold"></i>
+                        </button>
+                    </div>
 
-       <div class="col-lg-8 ">
-        <img src="img/Logo-500x500---Blanco-y-amarillo.png" alt="logo" class="img-fluid rounded float-start" style="margin-left: 200px;width:130px">
-    </div>
+                    <AddModal 
+                        isOpen={isModalOpen} 
+                        onClose={() => setIsModalOpen(false)} 
+                        onAdd={addTransaction} 
+                    />
+                </div>
+            );
+        };
 
-        
-    </footer>
-    <div class=" row headerEncabezado footerStyle1" style="margin-right: 0px;margin-right: 0px;margin-left: 0px;" >
-        
-        <div class="col-lg-11   list-unstyled">
-            <ul class="list-inline" style="margin-left: 20px;">
-              <li class="list-inline-item">
-                <a class=" fs-5 me-md-2 link-light" href="../index.html">Inicio</a>
-              </li>
-              <li class="list-inline-item">
-                <a class=" fs-5 me-md-2 link-light" href="#servicios">Servicios</a>
-              </li>
-              <li class="list-inline-item">
-                <a class=" fs-5 me-md-2 link-light" href="#quienesSomos">Quiénes somos</a>
-              </li>
-          </ul>
-          </div>
-
-          <div class="col-lg-1   list-unstyled">
-          <a class="link-light" href="https://www.facebook.com/camarasancarlos.mza" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
-            <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-          </svg></a>
-          
-          <a class="link-light" href="https://www.instagram.com/camarasancarlos_mza/" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
-            <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"/>
-          </svg></a>
-        </div>
-    </div>
-</div>
-    <!-- LINK JS BOOTSTRAP -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
+ 
+
+       
+
+    
+
+  
+      
