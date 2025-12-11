@@ -12,6 +12,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> 
     <style>
         body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -21,11 +22,11 @@
 <body class="bg-slate-100 text-slate-800 h-screen w-screen overflow-hidden font-sans">
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect, createContext, useContext } = React;
+        const { useState, useEffect, createContext, useContext, useRef } = React;
         const CtxLng = createContext();
         const TRNS = {
-            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", },
-            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", },
+            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", r: "Distribución de Gastos", s: "Otros", t: "Categoría", u: "Análisis", },
+            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", r: "Expense Distribution", s: "Others", t: "Category", u: "Analysis", },
         };
         const useLng = () => {
             const ctx = useContext(CtxLng);
@@ -98,6 +99,108 @@
                 </div>
             );
         };
+        
+        const ChartViz = ({ expenses }) => {
+            const { TR } = useLng();
+            const canvasRef = useRef(null);
+            const chartRef = useRef(null);
+
+            useEffect(() => {
+                if (chartRef.current) {
+                    chartRef.current.destroy();
+                }
+
+                const grouped = expenses.reduce((acc, tx) => {
+                    const cat = tx.category.trim() || TR.s;
+                    acc[cat] = (acc[cat] || 0) + tx.amount;
+                    return acc;
+                }, {});
+
+                const categories = Object.keys(grouped);
+                const amounts = Object.values(grouped);
+                
+                const colors = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
+                const backgroundColors = categories.map((_, index) => colors[index % colors.length]);
+
+                if (canvasRef.current && amounts.length > 0) {
+                    chartRef.current = new Chart(canvasRef.current, {
+                        type: 'doughnut',
+                        data: {
+                            labels: categories,
+                            datasets: [{
+                                data: amounts,
+                                backgroundColor: backgroundColors,
+                                hoverOffset: 4,
+                                borderColor: '#fff',
+                                borderWidth: 3,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        boxWidth: 15,
+                                        padding: 15,
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.label || '';
+                                            if (label) { label += ': '; }
+                                            if (context.parsed !== null) {
+                                                label += `$${context.parsed.toLocaleString('es-AR')}`;
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                return () => {
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                    }
+                };
+            }, [expenses, TR]);
+
+            if (expenses.length === 0) {
+                return (
+                    <div className="text-center py-10 opacity-50">
+                        <i className="ph ph-chart-bar text-4xl mb-2 text-slate-300"></i>
+                        <p className="text-slate-400">{TR.n}</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="relative h-64 w-full">
+                    <canvas ref={canvasRef} />
+                </div>
+            );
+        };
+
+        const DataViz = ({ txs }) => {
+            const { TR } = useLng();
+            const expenses = txs.filter(t => t.type === 'gasto');
+
+            return (
+                <div className="mb-8 p-4 bg-white rounded-2xl shadow-lg border border-slate-100">
+                    <h3 className="font-bold text-slate-700 text-lg mb-4 flex items-center gap-2">
+                        <i className="ph ph-chart-pie text-xl text-blue-600"></i>
+                        {TR.r}
+                    </h3>
+                    <ChartViz expenses={expenses} />
+                </div>
+            );
+        };
+
         const MDLAdd = ({ isOpen, onClose, onAdd }) => {
             const { TR } = useLng();
             if (!isOpen) return null;
@@ -143,6 +246,9 @@
                 return svd ? JSON.parse(svd) : [];
             });
             const [isMdl, setIsMdl] = useState(false);
+            
+            const [view, setView] = useState(0); 
+
             useEffect(() => {
                 localStorage.setItem('financeApp_data', JSON.stringify(txs));
             }, [txs]);
@@ -164,22 +270,48 @@
                         </div>
                         <CrdBal inc={incTtl} exp={expTtl} />
                     </header>
+                    
+                    <nav className="flex px-6 mb-4 gap-4">
+                        <button 
+                            onClick={() => setView(0)} 
+                            className={`pb-2 text-lg font-bold transition-colors ${view === 0 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                            {TR.u}
+                        </button>
+                        <button 
+                            onClick={() => setView(1)} 
+                            className={`pb-2 text-lg font-bold transition-colors ${view === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                            {TR.l}
+                        </button>
+                    </nav>
+
                     <div className="flex-1 overflow-y-auto px-6 pb-24 hide-scrollbar">
-                        <div className="flex justify-between items-end mb-4">
-                            <h3 className="font-bold text-slate-700 text-lg">{TR.l}</h3>
-                            <span className="text-xs text-slate-400 font-medium">{txs.length} {TR.m}</span>
-                        </div>
-                        {txs.length === 0 ? (
-                            <div className="text-center py-10 opacity-50">
-                                <i className="ph ph-receipt text-4xl mb-2 text-slate-300"></i>
-                                <p className="text-slate-400">{TR.n}</p>
+                        
+                        {view === 0 && (
+                            <div className="pt-4">
+                                <DataViz txs={txs} />
                             </div>
-                        ) : (
-                            txs.map(tx => (
-                                <ItemTx key={tx.id} item={tx} onDelete={delTx} />
-                            ))
+                        )}
+
+                        {view === 1 && (
+                            <>
+                                <div className="flex justify-between items-end mb-4">
+                                    <h3 className="font-bold text-slate-700 text-lg">{TR.l}</h3>
+                                    <span className="text-xs text-slate-400 font-medium">{txs.length} {TR.m}</span>
+                                </div>
+                                {txs.length === 0 ? (
+                                    <div className="text-center py-10 opacity-50">
+                                        <i className="ph ph-receipt text-4xl mb-2 text-slate-300"></i>
+                                        <p className="text-slate-400">{TR.n}</p>
+                                    </div>
+                                ) : (
+                                    txs.map(tx => (
+                                        <ItemTx key={tx.id} item={tx} onDelete={delTx} />
+                                    ))
+                                )}
+                            </>
                         )}
                     </div>
+                    
                     <div className="absolute bottom-6 right-6 z-10">
                         <button 
                             onClick={() => setIsMdl(true)}
@@ -212,4 +344,3 @@
     </script>
 </body>
 </html>
-         
