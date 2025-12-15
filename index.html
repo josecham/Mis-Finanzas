@@ -1,538 +1,536 @@
      <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mis Finanzas PWA</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1e293b">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <style>
-        body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mis Finanzas PWA</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e293b">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen w-screen font-sans">
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect, createContext, useContext, useRef } = React;
-        const CtxLng = createContext();
-        const TRNS = {
-            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", r: "Distribución de Gastos", s: "Otros", t: "Categoría", u: "Análisis", v: "Acceso Restringido", w: "Introduce la contraseña para continuar", x: "Contraseña", y: "Incorrecta", z: "Confirmar y Acceder", aa: "Acceso Expirado", bb: "El periodo de uso gratuito (6 meses) ha terminado.", cc: "La clave para este periodo es", dd: "Gracias por tu apoyo en TikTok! Introduce la clave:", ee: "Ir a TikTok", ff: "Ingresa la clave de reactivación que recibiste :" },
-            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", r: "Expense Distribution", s: "Others", t: "Category", u: "Analysis", v: "Restricted Access", w: "Enter password to continue", x: "Password", y: "Incorrect", z: "Confirm and Access", aa: "Access Expired", bb: "The free usage period (6 months) has ended.", cc: "The key for this period is", dd: "Thanks for your support on TikTok! Enter the key:", ee: "Go to TikTok", ff: "Enter the reactivation key:" },
-        };
-        const useLng = () => {
-            const ctx = useContext(CtxLng);
-            if (!ctx) { throw new Error('useLng must be used within a CtxLng Provider'); }
-            const { lng, setLng } = ctx;
-            return { TR: TRNS[lng] || TRNS.es, lng, setLng, };
-        };
-        const CmbLng = () => {
-            const { lng, setLng } = useLng();
-            return (
-                <select
-                    value={lng}
-                    onChange={(e) => setLng(e.target.value)}
-                    className="bg-slate-100 text-slate-600 font-bold rounded-full py-1 px-3 text-sm focus:ring-2 ring-blue-500/20 outline-none"
-                >
-                    <option value="es">ES</option>
-                    <option value="en">EN</option>
-                </select>
-            );
-        };
-        const CrdBal = ({ inc, exp }) => {
-            const { TR } = useLng();
-            const ttl = inc - exp;
-            return (
-                <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-blue-500 rounded-full opacity-20 blur-xl"></div>
-                    <p className="text-slate-400 text-sm font-medium mb-1">{TR.b}</p>
-                    <h1 className="text-4xl font-bold mb-6">${ttl.toLocaleString('es-AR')}</h1>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <div className="flex items-center gap-1 text-emerald-400 mb-1">
-                                <i className="ph-fill ph-arrow-circle-down text-lg"></i>
-                                <span className="text-xs font-bold uppercase tracking-wider">{TR.c}</span>
-                            </div>
-                            <p className="font-semibold text-lg">${inc.toLocaleString('es-AR')}</p>
-                        </div>
-                        <div className="w-px h-8 bg-slate-600"></div>
-                        <div className="text-right">
-                            <div className="flex items-center justify-end gap-1 text-rose-400 mb-1">
-                                <span className="text-xs font-bold uppercase tracking-wider">{TR.d}</span>
-                                <i className="ph-fill ph-arrow-circle-up text-lg"></i>
-                            </div>
-                            <p className="font-semibold text-lg">${exp.toLocaleString('es-AR')}</p>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-        const ItemTx = ({ item, onDelete }) => {
-            const isInc = item.type === 'ingreso';
-            return (
-                <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
-                    <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isInc ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                            <i className={`ph-fill ${isInc ? 'ph-money' : 'ph-shopping-cart'} text-xl`}></i>
-                        </div>
-                        <div>
-                            <p className="font-bold text-slate-700">{item.category}</p>
-                            <p className="text-xs text-slate-400">{new Date(item.date).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className={`font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'}`}>
-                            {isInc ? '+' : '-'}${parseFloat(item.amount).toLocaleString('es-AR')}
-                        </span>
-                        <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
-                            <i className="ph ph-trash text-lg"></i>
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-        
-        const ChartViz = ({ expenses }) => {
-            const { TR } = useLng();
-            const canvasRef = useRef(null);
-            const chartRef = useRef(null);
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext, useRef } = React;
+        const CtxLng = createContext();
+        const TRNS = {
+            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", r: "Distribución de Gastos", s: "Otros", t: "Categoría", u: "Análisis", v: "Acceso Restringido", w: "Introduce la contraseña para continuar", x: "Contraseña", y: "Incorrecta", z: "Confirmar y Acceder", aa: "Acceso Expirado", bb: "El periodo de uso gratuito (6 meses) ha terminado.", cc: "La clave para este periodo es", dd: "Gracias por tu apoyo en Facebook! Introduce la clave:", ee: "Ir a Facebook", ff: "Ingresa la clave de reactivación que recibiste :" },
+            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", r: "Expense Distribution", s: "Others", t: "Category", u: "Analysis", v: "Restricted Access", w: "Enter password to continue", x: "Password", y: "Incorrect", z: "Confirm and Access", aa: "Access Expired", bb: "The free usage period (6 months) has ended.", cc: "The key for this period is", dd: "Thanks for your support on Facebook! Enter the key:", ee: "Go to Facebook", ff: "Enter the reactivation key:" },
+        };
+        const useLng = () => {
+            const ctx = useContext(CtxLng);
+            if (!ctx) { throw new Error('useLng must be used within a CtxLng Provider'); }
+            const { lng, setLng } = ctx;
+            return { TR: TRNS[lng] || TRNS.es, lng, setLng, };
+        };
+        const CmbLng = () => {
+            const { lng, setLng } = useLng();
+            return (
+                <select
+                    value={lng}
+                    onChange={(e) => setLng(e.target.value)}
+                    className="bg-slate-100 text-slate-600 font-bold rounded-full py-1 px-3 text-sm focus:ring-2 ring-blue-500/20 outline-none"
+                >
+                    <option value="es">ES</option>
+                    <option value="en">EN</option>
+                </select>
+            );
+        };
+        const CrdBal = ({ inc, exp }) => {
+            const { TR } = useLng();
+            const ttl = inc - exp;
+            return (
+                <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-blue-500 rounded-full opacity-20 blur-xl"></div>
+                    <p className="text-slate-400 text-sm font-medium mb-1">{TR.b}</p>
+                    <h1 className="text-4xl font-bold mb-6">${ttl.toLocaleString('es-AR')}</h1>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <div className="flex items-center gap-1 text-emerald-400 mb-1">
+                                <i className="ph-fill ph-arrow-circle-down text-lg"></i>
+                                <span className="text-xs font-bold uppercase tracking-wider">{TR.c}</span>
+                            </div>
+                            <p className="font-semibold text-lg">${inc.toLocaleString('es-AR')}</p>
+                        </div>
+                        <div className="w-px h-8 bg-slate-600"></div>
+                        <div className="text-right">
+                            <div className="flex items-center justify-end gap-1 text-rose-400 mb-1">
+                                <span className="text-xs font-bold uppercase tracking-wider">{TR.d}</span>
+                                <i className="ph-fill ph-arrow-circle-up text-lg"></i>
+                            </div>
+                            <p className="font-semibold text-lg">${exp.toLocaleString('es-AR')}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        const ItemTx = ({ item, onDelete }) => {
+            const isInc = item.type === 'ingreso';
+            return (
+                <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isInc ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                            <i className={`ph-fill ${isInc ? 'ph-money' : 'ph-shopping-cart'} text-xl`}></i>
+                        </div>
+                        <div>
+                            <p className="font-bold text-slate-700">{item.category}</p>
+                            <p className="text-xs text-slate-400">{new Date(item.date).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className={`font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {isInc ? '+' : '-'}${parseFloat(item.amount).toLocaleString('es-AR')}
+                        </span>
+                        <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                            <i className="ph ph-trash text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+        
+        const ChartViz = ({ expenses }) => {
+            const { TR } = useLng();
+            const canvasRef = useRef(null);
+            const chartRef = useRef(null);
 
-            useEffect(() => {
-                if (chartRef.current) {
-                    chartRef.current.destroy();
-                }
+            useEffect(() => {
+                if (chartRef.current) {
+                    chartRef.current.destroy();
+                }
 
-                const grouped = expenses.reduce((acc, tx) => {
-                    const cat = tx.category.trim() || TR.s;
-                    acc[cat] = (acc[cat] || 0) + tx.amount;
-                    return acc;
-                }, {});
+                const grouped = expenses.reduce((acc, tx) => {
+                    const cat = tx.category.trim() || TR.s;
+                    acc[cat] = (acc[cat] || 0) + tx.amount;
+                    return acc;
+                }, {});
 
-                const categories = Object.keys(grouped);
-                const amounts = Object.values(grouped);
-                
-                const colors = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
-                const backgroundColors = categories.map((_, index) => colors[index % colors.length]);
+                const categories = Object.keys(grouped);
+                const amounts = Object.values(grouped);
+                
+                const colors = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
+                const backgroundColors = categories.map((_, index) => colors[index % colors.length]);
 
-                if (canvasRef.current && amounts.length > 0) {
-                    chartRef.current = new Chart(canvasRef.current, {
-                        type: 'doughnut',
-                        data: {
-                            labels: categories,
-                            datasets: [{
-                                data: amounts,
-                                backgroundColor: backgroundColors,
-                                hoverOffset: 4,
-                                borderColor: '#fff',
-                                borderWidth: 3,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        boxWidth: 15,
-                                        padding: 15,
-                                    }
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            let label = context.label || '';
-                                            if (label) { label += ': '; }
-                                            if (context.parsed !== null) {
-                                                label += `$${context.parsed.toLocaleString('es-AR')}`;
-                                            }
-                                            return label;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
+                if (canvasRef.current && amounts.length > 0) {
+                    chartRef.current = new Chart(canvasRef.current, {
+                        type: 'doughnut',
+                        data: {
+                            labels: categories,
+                            datasets: [{
+                                data: amounts,
+                                backgroundColor: backgroundColors,
+                                hoverOffset: 4,
+                                borderColor: '#fff',
+                                borderWidth: 3,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        boxWidth: 15,
+                                        padding: 15,
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.label || '';
+                                            if (label) { label += ': '; }
+                                            if (context.parsed !== null) {
+                                                label += `$${context.parsed.toLocaleString('es-AR')}`;
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
 
-                return () => {
-                    if (chartRef.current) {
-                        chartRef.current.destroy();
-                    }
-                };
-            }, [expenses, TR]);
+                return () => {
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                    }
+                };
+            }, [expenses, TR]);
 
-            if (expenses.length === 0) {
-                return (
-                    <div className="text-center py-10 opacity-50">
-                        <i className="ph ph-chart-bar text-4xl mb-2 text-slate-300"></i>
-                        <p className="text-slate-400">{TR.n}</p>
-                    </div>
-                );
-            }
+            if (expenses.length === 0) {
+                return (
+                    <div className="text-center py-10 opacity-50">
+                        <i className="ph ph-chart-bar text-4xl mb-2 text-slate-300"></i>
+                        <p className="text-slate-400">{TR.n}</p>
+                    </div>
+                );
+            }
 
-            return (
-                <div className="relative h-64 w-full">
-                    <canvas ref={canvasRef} />
-                </div>
-            );
-        };
+            return (
+                <div className="relative h-64 w-full">
+                    <canvas ref={canvasRef} />
+                </div>
+            );
+        };
 
-        const DataViz = ({ txs }) => {
-            const { TR } = useLng();
-            const expenses = txs.filter(t => t.type === 'gasto');
+        const DataViz = ({ txs }) => {
+            const { TR } = useLng();
+            const expenses = txs.filter(t => t.type === 'gasto');
 
-            return (
-                <div className="mb-8 p-4 bg-white rounded-2xl shadow-lg border border-slate-100">
-                    <h3 className="font-bold text-slate-700 text-lg mb-4 flex items-center gap-2">
-                        <i className="ph ph-chart-pie text-xl text-blue-600"></i>
-                        {TR.r}
-                    </h3>
-                    <ChartViz expenses={expenses} />
-                </div>
-            );
-        };
+            return (
+                <div className="mb-8 p-4 bg-white rounded-2xl shadow-lg border border-slate-100">
+                    <h3 className="font-bold text-slate-700 text-lg mb-4 flex items-center gap-2">
+                        <i className="ph ph-chart-pie text-xl text-blue-600"></i>
+                        {TR.r}
+                    </h3>
+                    <ChartViz expenses={expenses} />
+                </div>
+            );
+        };
 
-        const MDLAdd = ({ isOpen, onClose, onAdd }) => {
-            const { TR } = useLng();
-            if (!isOpen) return null;
-            const [mnt, setMnt] = useState('');
-            const [cat, setCat] = useState('');
-            const [tp, setTp] = useState('gasto');
-            const hdlSubmit = (e) => {
-                e.preventDefault();
-                if (!mnt || !cat) return;
-                onAdd({ amount: parseFloat(mnt), category: cat, type: tp });
-                setMnt(''); setCat(''); onClose();
-            };
-            return (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
-                        <h2 className="text-xl font-bold mb-4 text-slate-800">{TR.e}</h2>
-                        <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
-                            <button onClick={() => setTp('ingreso')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${tp === 'ingreso' ? 'bg-white shadow text-emerald-600' : 'text-slate-500'}`}>{TR.o}</button>
-                            <button onClick={() => setTp('gasto')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${tp === 'gasto' ? 'bg-white shadow text-rose-600' : 'text-slate-500'}`}>{TR.p}</button>
-                        </div>
-                        <form onSubmit={hdlSubmit} className="flex flex-col gap-4">
-                            <div>
-                                <label className="text-xs text-slate-500 font-bold ml-2">{TR.g}</label>
-                                <input type="number" value={mnt} onChange={e => setMnt(e.target.value)} placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none focus:ring-2 ring-blue-500/20" autoFocus />
-                            </div>
-                            <div>
-                                <label className="text-xs text-slate-500 font-bold ml-2">{TR.h}</label>
-                                <input type="text" value={cat} onChange={e => setCat(e.target.value)} placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ring-blue-500/20" />
-                            </div>
-                            <div className="flex gap-3 mt-4">
-                                <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 rounded-xl">{TR.j}</button>
-                                <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-800/20 active:scale-95 transition-transform">{TR.k}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            );
-        };
-        
-        const FREE_PASSWORD = '00'; 
-        const PREMIUM_PASSWORD = '9999'; 
-        
-        const ACCESS_KEY = 'financeApp_access_date';
-        const SIX_MONTHS_MS = 182.5 * 24 * 60 * 60 * 1000; 
-        const ACCESS_EXPIRY_MS = SIX_MONTHS_MS;
+        const MDLAdd = ({ isOpen, onClose, onAdd }) => {
+            const { TR } = useLng();
+            if (!isOpen) return null;
+            const [mnt, setMnt] = useState('');
+            const [cat, setCat] = useState('');
+            const [tp, setTp] = useState('gasto');
+            const hdlSubmit = (e) => {
+                e.preventDefault();
+                if (!mnt || !cat) return;
+                onAdd({ amount: parseFloat(mnt), category: cat, type: tp });
+                setMnt(''); setCat(''); onClose();
+            };
+            return (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                        <h2 className="text-xl font-bold mb-4 text-slate-800">{TR.e}</h2>
+                        <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+                            <button onClick={() => setTp('ingreso')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${tp === 'ingreso' ? 'bg-white shadow text-emerald-600' : 'text-slate-500'}`}>{TR.o}</button>
+                            <button onClick={() => setTp('gasto')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${tp === 'gasto' ? 'bg-white shadow text-rose-600' : 'text-slate-500'}`}>{TR.p}</button>
+                        </div>
+                        <form onSubmit={hdlSubmit} className="flex flex-col gap-4">
+                            <div>
+                                <label className="text-xs text-slate-500 font-bold ml-2">{TR.g}</label>
+                                <input type="number" value={mnt} onChange={e => setMnt(e.target.value)} placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none focus:ring-2 ring-blue-500/20" autoFocus />
+                            </div>
+                            <div>
+                                <label className="text-xs text-slate-500 font-bold ml-2">{TR.h}</label>
+                                <input type="text" value={cat} onChange={e => setCat(e.target.value)} placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ring-blue-500/20" />
+                            </div>
+                            <div className="flex gap-3 mt-4">
+                                <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 rounded-xl">{TR.j}</button>
+                                <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-lg shadow-slate-800/20 active:scale-95 transition-transform">{TR.k}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+        
+        const FREE_PASSWORD = '00'; 
+        const PREMIUM_PASSWORD = '9999'; 
+        
+        const ACCESS_KEY = 'financeApp_access_date';
+        const SIX_MONTHS_MS = 182.5 * 24 * 60 * 60 * 1000; 
+        const ACCESS_EXPIRY_MS = SIX_MONTHS_MS;
 
-        const MDLProtected = ({ isOpen, onClose, isExpired, resetAccessTime }) => {
-            const { TR } = useLng();
-            if (!isOpen) return null;
-            
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState(false);
+        const MDLProtected = ({ isOpen, onClose, isExpired, resetAccessTime }) => {
+            const { TR } = useLng();
+            if (!isOpen) return null;
+            
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState(false);
 
-            if (isExpired) {
-                
-                const hdlPremiumAccess = (e) => {
-                    e.preventDefault();
-                    setError(false);
+            if (isExpired) {
+                
+                const hdlPremiumAccess = (e) => {
+                    e.preventDefault();
+                    setError(false);
 
-                    if (password === PREMIUM_PASSWORD) {
-                        resetAccessTime(); 
-                        onClose();
-                        setPassword(''); 
-                    } else {
-                        setError(true); 
-                        setPassword('');
-                    }
-                };
+                    if (password === PREMIUM_PASSWORD) {
+                        resetAccessTime(); 
+                        onClose();
+                        setPassword(''); 
+                    } else {
+                        setError(true); 
+                        setPassword('');
+                    }
+                };
 
-                return (
-                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-800/95 backdrop-blur-lg p-4">
-                        <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
-                            <h2 className="text-2xl font-black mb-4 text-slate-800 flex items-center gap-2">
-                                <i className="ph ph-calendar-check text-rose-500"></i>
-                                {TR.aa}
-                            </h2>
-                            <p className="text-slate-500 mb-4">{TR.bb}</p>
-                            
-                            <form onSubmit={hdlPremiumAccess} className="flex flex-col gap-4">
-                                <p className="text-sm text-slate-700 font-bold mt-4">{TR.ff}</p>
-                                
-                                <div>
-                                    <input 
-                                        type="password" 
-                                        value={password} 
-                                        onChange={e => setPassword(e.target.value)} 
-                                        placeholder={TR.x} 
-                                        className={`w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ${error ? 'ring-rose-500 border border-rose-500' : 'ring-blue-500/20'}`} 
-                                        autoFocus 
-                                    />
-                                    {error && <p className="text-rose-500 text-xs mt-1 ml-2 font-medium">Clave de Pago {TR.y}.</p>}
-                                </div>
-                                
-                                <div className="flex justify-between items-center mt-4 pt-2 border-t border-slate-100">
-                                    <a 
-                                        href="https://www.tiktok.com/@misfinanzas0" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="py-2 text-sm text-blue-600 font-bold hover:text-blue-800 transition-colors flex items-center gap-1"
-                                    >
-                                        <i className="ph ph-tiktok-logo-fill text-xl"></i>
-                                        Solicitar Acceso por TikTok
-                                    </a>
-                                    <button 
-                                        type="submit" 
-                                        className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 active:scale-95 transition-transform"
-                                    >
-                                        Activar Acceso
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                );
-            }
+                return (
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-800/95 backdrop-blur-lg p-4">
+                        <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                            <h2 className="text-2xl font-black mb-4 text-slate-800 flex items-center gap-2">
+                                <i className="ph ph-calendar-check text-rose-500"></i>
+                                {TR.aa}
+                            </h2>
+                            <p className="text-slate-500 mb-4">{TR.bb}</p>
+                            
+                            <form onSubmit={hdlPremiumAccess} className="flex flex-col gap-4">
+                                <p className="text-sm text-slate-700 font-bold mt-4">{TR.ff}</p>
+                                
+                                <div>
+                                    <input 
+                                        type="password" 
+                                        value={password} 
+                                        onChange={e => setPassword(e.target.value)} 
+                                        placeholder={TR.x} 
+                                        className={`w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ${error ? 'ring-rose-500 border border-rose-500' : 'ring-blue-500/20'}`} 
+                                        autoFocus 
+                                    />
+                                    {error && <p className="text-rose-500 text-xs mt-1 ml-2 font-medium">Clave de Pago {TR.y}.</p>}
+                                </div>
+                                
+                                <div className="flex justify-between items-center mt-4 pt-2 border-t border-slate-100">
+                                    <a 
+                                        href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" // CAMBIO: Enlace a Facebook
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="py-2 text-sm text-blue-600 font-bold hover:text-blue-800 transition-colors flex items-center gap-1"
+                                    >
+                                        <i className="ph ph-facebook-logo-fill text-xl"></i> {/* CAMBIO: Ícono de Facebook */}
+                                        Solicitar Acceso por Facebook
+                                    </a>
+                                    <button 
+                                        type="submit" 
+                                        className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 active:scale-95 transition-transform"
+                                    >
+                                        Activar Acceso
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                );
+            }
 
-            const hdlFreeAccess = (e) => {
-                e.preventDefault();
-                setError(false);
+            const hdlFreeAccess = (e) => {
+                e.preventDefault();
+                setError(false);
 
-                if (password === FREE_PASSWORD) {
-                    onClose();
-                    setPassword(''); 
-                } else {
-                    setError(true); 
-                    setPassword('');
-                }
-            };
-            
-            return (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-800/95 backdrop-blur-lg p-4">
-                    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
-                        <h2 className="text-2xl font-black mb-4 text-slate-800 flex items-center gap-2">
-                            <i className="ph ph-tiktok-logo text-rose-500"></i>
-                            {TR.v}
-                        </h2>
-                        
-                        <p className="text-slate-500 mb-3">{TR.dd}</p>
-                        <div className="bg-slate-100 p-3 rounded-xl text-center mb-6">
-                            <p className="text-xs text-slate-500 mb-1">{TR.cc}</p>
-                            <span className="text-3xl font-black text-rose-600 tracking-widest">{FREE_PASSWORD}</span>
-                        </div>
-                        
-                        <a 
-                            href="https://www.tiktok.com/@misfinanzas0" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800 mb-4 block"
-                        >
-                            <i className="ph ph-tiktok-logo text-lg mr-1"></i>{TR.ee}
-                        </a>
+                if (password === FREE_PASSWORD) {
+                    onClose();
+                    setPassword(''); 
+                } else {
+                    setError(true); 
+                    setPassword('');
+                }
+            };
+            
+            return (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-800/95 backdrop-blur-lg p-4">
+                    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                        <h2 className="text-2xl font-black mb-4 text-slate-800 flex items-center gap-2">
+                            <i className="ph ph-lock text-rose-500"></i> {/* CAMBIO: Usé candado genérico en el modal free */}
+                            {TR.v}
+                        </h2>
+                        
+                        <p className="text-slate-500 mb-3">{TR.dd}</p>
+                        <div className="bg-slate-100 p-3 rounded-xl text-center mb-6">
+                            <p className="text-xs text-slate-500 mb-1">{TR.cc}</p>
+                            <span className="text-3xl font-black text-rose-600 tracking-widest">{FREE_PASSWORD}</span>
+                        </div>
+                        
+                        <a 
+                            href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" // CAMBIO: Enlace a Facebook
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800 mb-4 block"
+                        >
+                            <i className="ph ph-facebook-logo-fill text-lg mr-1"></i>{TR.ee} {/* CAMBIO: Ícono y texto de Facebook */}
+                        </a>
 
-                        <form onSubmit={hdlFreeAccess} className="flex flex-col gap-4">
-                            <div>
-                                <input 
-                                    type="password" 
-                                    value={password} 
-                                    onChange={e => setPassword(e.target.value)} 
-                                    placeholder={TR.x} 
-                                    className={`w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ${error ? 'ring-rose-500 border border-rose-500' : 'ring-blue-500/20'}`} 
-                                    autoFocus 
-                                />
-                                {error && <p className="text-rose-500 text-xs mt-1 ml-2 font-medium">{TR.x} {TR.y}.</p>}
-                            </div>
-                            
-                            <div className="flex justify-end mt-4">
-                                <button 
-                                    type="submit" 
-                                    className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 active:scale-95 transition-transform"
-                                >
-                                    {TR.z}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            );
-        };
+                        <form onSubmit={hdlFreeAccess} className="flex flex-col gap-4">
+                            <div>
+                                <input 
+                                    type="password" 
+                                    value={password} 
+                                    onChange={e => setPassword(e.target.value)} 
+                                    placeholder={TR.x} 
+                                    className={`w-full bg-slate-50 p-4 rounded-xl font-medium outline-none focus:ring-2 ${error ? 'ring-rose-500 border border-rose-500' : 'ring-blue-500/20'}`} 
+                                    autoFocus 
+                                />
+                                {error && <p className="text-rose-500 text-xs mt-1 ml-2 font-medium">{TR.x} {TR.y}.</p>}
+                            </div>
+                            
+                            <div className="flex justify-end mt-4">
+                                <button 
+                                    type="submit" 
+                                    className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 active:scale-95 transition-transform"
+                                >
+                                    {TR.z}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
 
-        const MainApp = () => {
-            const { TR } = useLng();
-            
-            const [accessDate, setAccessDate] = useState(() => {
-                const svd = localStorage.getItem(ACCESS_KEY);
-                if (svd) {
-                    return parseInt(svd, 10);
-                } else {
-                    const now = Date.now();
-                    localStorage.setItem(ACCESS_KEY, now.toString());
-                    return now;
-                }
-            });
+        const MainApp = () => {
+            const { TR } = useLng();
+            
+            const [accessDate, setAccessDate] = useState(() => {
+                const svd = localStorage.getItem(ACCESS_KEY);
+                if (svd) {
+                    return parseInt(svd, 10);
+                } else {
+                    const now = Date.now();
+                    localStorage.setItem(ACCESS_KEY, now.toString());
+                    return now;
+                }
+            });
 
-            const resetAccessTime = () => {
-                const now = Date.now();
-                localStorage.setItem(ACCESS_KEY, now.toString());
-                setAccessDate(now); 
-            };
+            const resetAccessTime = () => {
+                const now = Date.now();
+                localStorage.setItem(ACCESS_KEY, now.toString());
+                setAccessDate(now); 
+            };
 
-            const isTimeExpired = Date.now() - accessDate > ACCESS_EXPIRY_MS;
+            const isTimeExpired = Date.now() - accessDate > ACCESS_EXPIRY_MS;
 
-            const [txs, setTxs] = useState(() => {
-                const svd = localStorage.getItem('financeApp_data');
-                return svd ? JSON.parse(svd) : [];
-            });
-            const [isMdl, setIsMdl] = useState(false);
-            const [view, setView] = useState(0); 
-            
-            const [isProtectedMdl, setIsProtectedMdl] = useState(true);
+            const [txs, setTxs] = useState(() => {
+                const svd = localStorage.getItem('financeApp_data');
+                return svd ? JSON.parse(svd) : [];
+            });
+            const [isMdl, setIsMdl] = useState(false);
+            const [view, setView] = useState(0); 
+            
+            const [isProtectedMdl, setIsProtectedMdl] = useState(true);
 
-            useEffect(() => {
-                localStorage.setItem('financeApp_data', JSON.stringify(txs));
-            }, [txs]);
+            useEffect(() => {
+                localStorage.setItem('financeApp_data', JSON.stringify(txs));
+            }, [txs]);
 
-            const addTx = (data) => {
-                const newTx = { ...data, id: Date.now(), date: new Date().toISOString() };
-                setTxs([newTx, ...txs]);
-            };
-            const delTx = (id) => {
-                setTxs(txs.filter(t => t.id !== id));
-            };
-            const incTtl = txs.filter(t => t.type === 'ingreso').reduce((acc, curr) => acc + curr.amount, 0);
-            const expTtl = txs.filter(t => t.type === 'gasto').reduce((acc, curr) => acc + curr.amount, 0);
-            
-            return (
-                <div className="h-full max-w-md mx-auto bg-white sm:border-x sm:border-slate-200 relative flex flex-col">
-                    
-                    {!isProtectedMdl && (
-                        <>
-                            <header className="p-6 pb-2">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h1 className="text-2xl font-black text-slate-800">{TR.a}</h1>
-                                    <div className="flex items-center gap-3">
-                                        
-                                        <a 
-                                            href="https://www.tiktok.com/@misfinanzas0" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer" 
-                                            title="Visita nuestro TikTok"
-                                            className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-800 text-white transition-all hover:bg-black"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="w-4 h-4 fill-current">
-                                                <path d="M448 209.9a210.7 210.7 0 0 1-122.8-39.7a312.4 312.4 0 0 1-54.7-41.2V262.3a12.2 12.2 0 0 1-11.8 12.2a275.9 275.9 0 0 1-76.3 3.6a146.4 146.4 0 0 1-36.9-25.1a257.5 257.5 0 0 0 35.7 131.9c0 82.2-70.6 150-166.5 150C70.6 512 0 444.2 0 362s70.6-150 166.5-150A195.9 195.9 0 0 1 230 227v-84c13.2-13.6 27.6-26.6 43.1-38.6c15.6-12.1 32.1-23.3 49.5-33.3c35.6-20 73.1-34.8 111.9-42.6V209.9z"/>
-                                            </svg>
-                                        </a>
-                                        
-                                        <CmbLng />
-                                    </div>
-                                </div>
-                                <CrdBal inc={incTtl} exp={expTtl} />
-                            </header>
-                            
-                            <nav className="flex px-6 mb-4 gap-4">
-                                <button 
-                                    onClick={() => setView(0)} 
-                                    className={`pb-2 text-lg font-bold transition-colors ${view === 0 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                                    {TR.u}
-                                </button>
-                                <button 
-                                    onClick={() => setView(1)} 
-                                    className={`pb-2 text-lg font-bold transition-colors ${view === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
-                                    {TR.l}
-                                </button>
-                            </nav>
+            const addTx = (data) => {
+                const newTx = { ...data, id: Date.now(), date: new Date().toISOString() };
+                setTxs([newTx, ...txs]);
+            };
+            const delTx = (id) => {
+                setTxs(txs.filter(t => t.id !== id));
+            };
+            const incTtl = txs.filter(t => t.type === 'ingreso').reduce((acc, curr) => acc + curr.amount, 0);
+            const expTtl = txs.filter(t => t.type === 'gasto').reduce((acc, curr) => acc + curr.amount, 0);
+            
+            return (
+                <div className="h-full max-w-md mx-auto bg-white sm:border-x sm:border-slate-200 relative flex flex-col">
+                    
+                    {!isProtectedMdl && (
+                        <>
+                            <header className="p-6 pb-2">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h1 className="text-2xl font-black text-slate-800">{TR.a}</h1>
+                                    <div className="flex items-center gap-3">
+                                        
+                                        <a 
+                                            href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" // CAMBIO: Enlace a Facebook
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            title="Visita nuestro Facebook"
+                                            className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white transition-all hover:bg-blue-700" // CAMBIO: Estilos para Facebook
+                                        >
+                                            <i className="ph ph-facebook-logo-fill text-lg"></i> {/* CAMBIO: Ícono de Facebook */}
+                                        </a>
+                                        
+                                        <CmbLng />
+                                    </div>
+                                </div>
+                                <CrdBal inc={incTtl} exp={expTtl} />
+                            </header>
+                            
+                            <nav className="flex px-6 mb-4 gap-4">
+                                <button 
+                                    onClick={() => setView(0)} 
+                                    className={`pb-2 text-lg font-bold transition-colors ${view === 0 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                    {TR.u}
+                                </button>
+                                <button 
+                                    onClick={() => setView(1)} 
+                                    className={`pb-2 text-lg font-bold transition-colors ${view === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                    {TR.l}
+                                </button>
+                            </nav>
 
-                            <div className="flex-1 overflow-y-auto px-6 pb-24">
-                                
-                                {view === 0 && (
-                                    <div className="pt-4">
-                                        <DataViz txs={txs} />
-                                    </div>
-                                )}
+                            <div className="flex-1 overflow-y-auto px-6 pb-24">
+                                
+                                {view === 0 && (
+                                    <div className="pt-4">
+                                        <DataViz txs={txs} />
+                                    </div>
+                                )}
 
-                                {view === 1 && (
-                                    <>
-                                        <div className="flex justify-between items-end mb-4">
-                                            <h3 className="font-bold text-slate-700 text-lg">{TR.l}</h3>
-                                            <span className="text-xs text-slate-400 font-medium">{txs.length} {TR.m}</span>
-                                        </div>
-                                        {txs.length === 0 ? (
-                                            <div className="text-center py-10 opacity-50">
-                                                <i className="ph ph-receipt text-4xl mb-2 text-slate-300"></i>
-                                                <p className="text-slate-400">{TR.n}</p>
-                                            </div>
-                                        ) : (
-                                            txs.map(tx => (
-                                                <ItemTx key={tx.id} item={tx} onDelete={delTx} />
-                                            ))
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                            
-                            <div className="absolute bottom-6 right-6 z-10">
-                                <button 
-                                    onClick={() => setIsMdl(true)}
-                                    className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-600/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-                                >
-                                    <i className="ph ph-plus text-3xl font-bold"></i>
-                                </button>
-                            </div>
-                        </>
-                    )}
-                    
-                    {!isProtectedMdl && (
-                         <MDLAdd 
-                            isOpen={isMdl} 
-                            onClose={() => setIsMdl(false)} 
-                            onAdd={addTx} 
-                        />
-                    )}
-                    
-                    <MDLProtected 
-                        isOpen={isProtectedMdl} 
-                        onClose={() => setIsProtectedMdl(false)} 
-                        isExpired={isTimeExpired}
-                        resetAccessTime={resetAccessTime}
-                    />
-                </div>
-            );
-        };
-        const RootApp = () => {
-            const [lng, setLng] = useState(() => localStorage.getItem('appLanguage') || 'es');
-            useEffect(() => {
-                localStorage.setItem('appLanguage', lng);
-            }, [lng]);
-            return (
-                <CtxLng.Provider value={{ lng, setLng }}>
-                    <MainApp />
-                </CtxLng.Provider>
-            );
-        };
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<RootApp />);
-    </script>
+                                {view === 1 && (
+                                    <>
+                                        <div className="flex justify-between items-end mb-4">
+                                            <h3 className="font-bold text-slate-700 text-lg">{TR.l}</h3>
+                                            <span className="text-xs text-slate-400 font-medium">{txs.length} {TR.m}</span>
+                                        </div>
+                                        {txs.length === 0 ? (
+                                            <div className="text-center py-10 opacity-50">
+                                                <i className="ph ph-receipt text-4xl mb-2 text-slate-300"></i>
+                                                <p className="text-slate-400">{TR.n}</p>
+                                            </div>
+                                        ) : (
+                                            txs.map(tx => (
+                                                <ItemTx key={tx.id} item={tx} onDelete={delTx} />
+                                            ))
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            
+                            <div className="absolute bottom-6 right-6 z-10">
+                                <button 
+                                    onClick={() => setIsMdl(true)}
+                                    className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-600/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                                >
+                                    <i className="ph ph-plus text-3xl font-bold"></i>
+                                </button>
+                            </div>
+                        </>
+                    )}
+                    
+                    {!isProtectedMdl && (
+                         <MDLAdd 
+                            isOpen={isMdl} 
+                            onClose={() => setIsMdl(false)} 
+                            onAdd={addTx} 
+                        />
+                    )}
+                    
+                    <MDLProtected 
+                        isOpen={isProtectedMdl} 
+                        onClose={() => setIsProtectedMdl(false)} 
+                        isExpired={isTimeExpired}
+                        resetAccessTime={resetAccessTime}
+                    />
+                </div>
+            );
+        };
+        const RootApp = () => {
+            const [lng, setLng] = useState(() => localStorage.getItem('appLanguage') || 'es');
+            useEffect(() => {
+                localStorage.setItem('appLanguage', lng);
+            }, [lng]);
+            return (
+                <CtxLng.Provider value={{ lng, setLng }}>
+                    <MainApp />
+                </CtxLng.Provider>
+            );
+        };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RootApp />);
+    </script>
 </body>
 </html>
