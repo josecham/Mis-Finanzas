@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mis Finanzas PWA</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1e293b">
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -21,11 +17,11 @@
 <body class="bg-slate-100 text-slate-800 h-screen w-screen font-sans">
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect, createContext, useContext, useRef } = React;
+        const { useState, useEffect, createContext, useContext } = React;
         const CtxLng = createContext();
         const TRNS = {
-            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", r: "Distribución de Gastos", s: "Otros", u: "Análisis" },
-            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", r: "Expense Distribution", s: "Others", u: "Analysis" },
+            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Sueldo, Venta, Super...", j: "Cancelar", k: "Guardar", l: "Movimientos", n: "No hay movimientos", o: "Ingreso", p: "Gasto" },
+            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Salary, Sale, Food...", j: "Cancel", k: "Save", l: "Movements", n: "No movements", o: "Income", p: "Expense" },
         };
 
         const useLng = () => {
@@ -33,76 +29,26 @@
             return { TR: TRNS[ctx.lng] || TRNS.es, lng: ctx.lng, setLng: ctx.setLng };
         };
 
-        const CmbLng = () => {
-            const { lng, setLng } = useLng();
-            return (
-                <select value={lng} onChange={(e) => setLng(e.target.value)} className="bg-slate-100 text-slate-600 font-bold rounded-full py-1 px-3 text-sm outline-none">
-                    <option value="es">ES</option>
-                    <option value="en">EN</option>
-                </select>
-            );
-        };
-
-        const CrdBal = ({ inc, exp }) => {
-            const { TR } = useLng();
-            return (
-                <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-blue-500 rounded-full opacity-20 blur-xl"></div>
-                    <p className="text-slate-400 text-sm font-medium mb-1">{TR.b}</p>
-                    <h1 className="text-4xl font-bold mb-6">${(inc - exp).toLocaleString('es-AR')}</h1>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <div className="flex items-center gap-1 text-emerald-400 mb-1">
-                                <i className="ph-fill ph-arrow-circle-down text-lg"></i>
-                                <span className="text-xs font-bold uppercase tracking-wider">{TR.c}</span>
-                            </div>
-                            <p className="font-semibold text-lg">${inc.toLocaleString('es-AR')}</p>
-                        </div>
-                        <div className="w-px h-8 bg-slate-600"></div>
-                        <div className="text-right">
-                            <div className="flex items-center justify-end gap-1 text-rose-400 mb-1">
-                                <span className="text-xs font-bold uppercase tracking-wider">{TR.d}</span>
-                                <i className="ph-fill ph-arrow-circle-up text-lg"></i>
-                            </div>
-                            <p className="font-semibold text-lg">${exp.toLocaleString('es-AR')}</p>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const ItemTx = ({ item, onDelete }) => {
-            const isInc = item.type === 'ingreso';
-            return (
-                <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
-                    <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isInc ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                            <i className={`ph-fill ${isInc ? 'ph-money' : 'ph-shopping-cart'} text-xl`}></i>
-                        </div>
-                        <div>
-                            <p className="font-bold text-slate-700">{item.category}</p>
-                            <p className="text-xs text-slate-400">{new Date(item.date).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className={`font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'}`}>
-                            {isInc ? '+' : '-'}${parseFloat(item.amount).toLocaleString('es-AR')}
-                        </span>
-                        <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500"><i className="ph ph-trash text-lg"></i></button>
-                    </div>
-                </div>
-            );
-        };
-
         const MainApp = () => {
             const { TR } = useLng();
             const [txs, setTxs] = useState(() => JSON.parse(localStorage.getItem('financeApp_data') || '[]'));
             const [isMdl, setIsMdl] = useState(false);
-            const [view, setView] = useState(0);
+            const [view, setView] = useState(1);
+            const [newType, setNewType] = useState('gasto'); // Estado para el tipo en el modal
 
             useEffect(() => { localStorage.setItem('financeApp_data', JSON.stringify(txs)); }, [txs]);
 
-            const addTx = (data) => setTxs([{ ...data, id: Date.now(), date: new Date().toISOString() }, ...txs]);
+            const addTx = (e) => {
+                e.preventDefault();
+                const m = e.target.mnt.value;
+                const c = e.target.cat.value;
+                if(m && c) {
+                    setTxs([{ id: Date.now(), amount: parseFloat(m), category: c, type: newType, date: new Date().toISOString() }, ...txs]);
+                    setIsMdl(false);
+                    setNewType('gasto'); // Reset a gasto para la próxima
+                }
+            };
+
             const delTx = (id) => setTxs(txs.filter(t => t.id !== id));
             const incTtl = txs.filter(t => t.type === 'ingreso').reduce((acc, curr) => acc + curr.amount, 0);
             const expTtl = txs.filter(t => t.type === 'gasto').reduce((acc, curr) => acc + curr.amount, 0);
@@ -113,36 +59,69 @@
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-2xl font-black text-slate-800">{TR.a}</h1>
                             <div className="flex items-center gap-3">
-                                {/* LINK DE FACEBOOK */}
-                                <a href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                <a href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" target="_blank" className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white">
                                     <i className="ph-fill ph-facebook-logo text-xl"></i>
                                 </a>
-                                <CmbLng />
                             </div>
                         </div>
-                        <CrdBal inc={incTtl} exp={expTtl} />
+                        {/* CARD DE SALDO */}
+                        <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6">
+                            <p className="text-slate-400 text-sm mb-1">{TR.b}</p>
+                            <h1 className="text-4xl font-bold mb-6">${(incTtl - expTtl).toLocaleString('es-AR')}</h1>
+                            <div className="flex justify-between">
+                                <div>
+                                    <span className="text-xs text-emerald-400 font-bold block">{TR.c}</span>
+                                    <p className="font-semibold text-lg text-emerald-100">+${incTtl.toLocaleString('es-AR')}</p>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-xs text-rose-400 font-bold block">{TR.d}</span>
+                                    <p className="font-semibold text-lg text-rose-100">-${expTtl.toLocaleString('es-AR')}</p>
+                                </div>
+                            </div>
+                        </div>
                     </header>
-                    <nav className="flex px-6 mb-4 gap-4">
-                        <button onClick={() => setView(0)} className={`pb-2 text-lg font-bold ${view === 0 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}`}>{TR.u}</button>
-                        <button onClick={() => setView(1)} className={`pb-2 text-lg font-bold ${view === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}`}>{TR.l}</button>
-                    </nav>
+
                     <div className="flex-1 overflow-y-auto px-6 pb-24">
-                        {view === 1 ? txs.map(tx => <ItemTx key={tx.id} item={tx} onDelete={delTx} />) : <div className="text-center py-10 opacity-50"><i className="ph ph-chart-pie text-4xl mb-2"></i><p>{TR.n}</p></div>}
+                        <h2 className="font-bold text-slate-400 text-sm uppercase tracking-widest mb-4">{TR.l}</h2>
+                        {txs.length === 0 ? <p className="text-center text-slate-400 py-10">{TR.n}</p> : 
+                            txs.map(tx => (
+                                <div key={tx.id} className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'ingreso' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                            <i className={`ph-fill ${tx.type === 'ingreso' ? 'ph-trend-up' : 'ph-trend-down'} text-xl`}></i>
+                                        </div>
+                                        <div><p className="font-bold text-slate-700">{tx.category}</p><p className="text-xs text-slate-400">{new Date(tx.date).toLocaleDateString()}</p></div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className={`font-bold ${tx.type === 'ingreso' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            {tx.type === 'ingreso' ? '+' : '-'}${tx.amount.toLocaleString('es-AR')}
+                                        </span>
+                                        <button onClick={() => delTx(tx.id)} className="text-slate-300"><i className="ph ph-trash text-lg"></i></button>
+                                    </div>
+                                </div>
+                            ))
+                        }
                     </div>
+
                     <div className="absolute bottom-6 right-6">
-                        <button onClick={() => setIsMdl(true)} className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+                        <button onClick={() => setIsMdl(true)} className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl flex items-center justify-center active:scale-90 transition-transform">
                             <i className="ph ph-plus text-3xl font-bold"></i>
                         </button>
                     </div>
-                    {/* MODAL SIMPLIFICADO */}
+
+                    {/* MODAL CORREGIDO CON SELECTOR DE TIPO */}
                     {isMdl && (
-                        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4">
+                        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4">
                             <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
                                 <h2 className="text-xl font-bold mb-4">{TR.e}</h2>
-                                <form onSubmit={(e) => { e.preventDefault(); const m = e.target.mnt.value; const c = e.target.cat.value; if(m && c) { addTx({amount: parseFloat(m), category: c, type: 'gasto'}); setIsMdl(false); } }} className="flex flex-col gap-4">
-                                    <input name="mnt" type="number" placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none" autoFocus />
-                                    <input name="cat" type="text" placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none" />
-                                    <div className="flex gap-3">
+                                <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+                                    <button onClick={() => setNewType('gasto')} className={`flex-1 py-2 rounded-lg font-bold transition-all ${newType === 'gasto' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}>{TR.p}</button>
+                                    <button onClick={() => setNewType('ingreso')} className={`flex-1 py-2 rounded-lg font-bold transition-all ${newType === 'ingreso' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}>{TR.o}</button>
+                                </div>
+                                <form onSubmit={addTx} className="flex flex-col gap-4">
+                                    <input name="mnt" type="number" step="0.01" placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none border-2 border-transparent focus:border-blue-500" autoFocus required />
+                                    <input name="cat" type="text" placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none border-2 border-transparent focus:border-blue-500" required />
+                                    <div className="flex gap-3 mt-2">
                                         <button type="button" onClick={() => setIsMdl(false)} className="flex-1 py-4 text-slate-500 font-bold">{TR.j}</button>
                                         <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl">{TR.k}</button>
                                     </div>
@@ -155,7 +134,7 @@
         };
 
         const RootApp = () => {
-            const [lng, setLng] = useState(localStorage.getItem('appLanguage') || 'es');
+            const [lng, setLng] = useState('es');
             return (<CtxLng.Provider value={{ lng, setLng }}><MainApp /></CtxLng.Provider>);
         };
         ReactDOM.createRoot(document.getElementById('root')).render(<RootApp />);
