@@ -9,34 +9,55 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .chart-container { position: relative; height: 250px; width: 100%; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen w-screen font-sans">
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect, createContext, useContext } = React;
-        const CtxLng = createContext();
-        const TRNS = {
-            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Sueldo, Venta, Super...", j: "Cancelar", k: "Guardar", l: "Movimientos", n: "No hay movimientos", o: "Ingreso", p: "Gasto" },
-            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Salary, Sale, Food...", j: "Cancel", k: "Save", l: "Movements", n: "No movements", o: "Income", p: "Expense" },
-        };
-
-        const useLng = () => {
-            const ctx = useContext(CtxLng);
-            return { TR: TRNS[ctx.lng] || TRNS.es, lng: ctx.lng, setLng: ctx.setLng };
-        };
+        const { useState, useEffect, useRef } = React;
 
         const MainApp = () => {
-            const { TR } = useLng();
             const [txs, setTxs] = useState(() => JSON.parse(localStorage.getItem('financeApp_data') || '[]'));
             const [isMdl, setIsMdl] = useState(false);
-            const [view, setView] = useState(1);
-            const [newType, setNewType] = useState('gasto'); // Estado para el tipo en el modal
+            const [view, setView] = useState('analisis'); // 'analisis' o 'lista'
+            const [newType, setNewType] = useState('gasto');
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
 
             useEffect(() => { localStorage.setItem('financeApp_data', JSON.stringify(txs)); }, [txs]);
+
+            // Lógica del Gráfico
+            useEffect(() => {
+                if (view === 'analisis' && chartRef.current && txs.length > 0) {
+                    const inc = txs.filter(t => t.type === 'ingreso').reduce((a, b) => a + b.amount, 0);
+                    const exp = txs.filter(t => t.type === 'gasto').reduce((a, b) => a + b.amount, 0);
+
+                    if (chartInstance.current) chartInstance.current.destroy();
+
+                    const ctx = chartRef.current.getContext('2d');
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Ingresos', 'Gastos'],
+                            datasets: [{
+                                data: [inc, exp],
+                                backgroundColor: ['#10b981', '#f43f5e'],
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            cutout: '70%',
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                }
+            }, [view, txs]);
 
             const addTx = (e) => {
                 e.preventDefault();
@@ -45,7 +66,7 @@
                 if(m && c) {
                     setTxs([{ id: Date.now(), amount: parseFloat(m), category: c, type: newType, date: new Date().toISOString() }, ...txs]);
                     setIsMdl(false);
-                    setNewType('gasto'); // Reset a gasto para la próxima
+                    setNewType('gasto');
                 }
             };
 
@@ -57,50 +78,70 @@
                 <div className="h-full max-w-md mx-auto bg-white sm:border-x sm:border-slate-200 relative flex flex-col">
                     <header className="p-6 pb-2">
                         <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-2xl font-black text-slate-800">{TR.a}</h1>
-                            <div className="flex items-center gap-3">
-                                <a href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" target="_blank" className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white">
-                                    <i className="ph-fill ph-facebook-logo text-xl"></i>
-                                </a>
-                            </div>
+                            <h1 className="text-2xl font-black text-slate-800">Mis Finanzas</h1>
+                            <a href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" target="_blank" className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white shadow-lg">
+                                <i className="ph-fill ph-facebook-logo text-xl"></i>
+                            </a>
                         </div>
-                        {/* CARD DE SALDO */}
+                        
                         <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6">
-                            <p className="text-slate-400 text-sm mb-1">{TR.b}</p>
+                            <p className="text-slate-400 text-sm mb-1">Saldo Total</p>
                             <h1 className="text-4xl font-bold mb-6">${(incTtl - expTtl).toLocaleString('es-AR')}</h1>
                             <div className="flex justify-between">
                                 <div>
-                                    <span className="text-xs text-emerald-400 font-bold block">{TR.c}</span>
+                                    <span className="text-xs text-emerald-400 font-bold block uppercase">Ingresos</span>
                                     <p className="font-semibold text-lg text-emerald-100">+${incTtl.toLocaleString('es-AR')}</p>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-xs text-rose-400 font-bold block">{TR.d}</span>
+                                    <span className="text-xs text-rose-400 font-bold block uppercase">Gastos</span>
                                     <p className="font-semibold text-lg text-rose-100">-${expTtl.toLocaleString('es-AR')}</p>
                                 </div>
                             </div>
                         </div>
                     </header>
 
+                    <nav className="flex px-6 mb-4 gap-6 border-b border-slate-100">
+                        <button onClick={() => setView('analisis')} className={`pb-2 font-bold ${view === 'analisis' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}`}>Análisis</button>
+                        <button onClick={() => setView('lista')} className={`pb-2 font-bold ${view === 'lista' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}`}>Movimientos</button>
+                    </nav>
+
                     <div className="flex-1 overflow-y-auto px-6 pb-24">
-                        <h2 className="font-bold text-slate-400 text-sm uppercase tracking-widest mb-4">{TR.l}</h2>
-                        {txs.length === 0 ? <p className="text-center text-slate-400 py-10">{TR.n}</p> : 
-                            txs.map(tx => (
-                                <div key={tx.id} className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'ingreso' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                                            <i className={`ph-fill ${tx.type === 'ingreso' ? 'ph-trend-up' : 'ph-trend-down'} text-xl`}></i>
+                        {view === 'analisis' ? (
+                            <div className="py-4">
+                                <h3 className="font-bold text-slate-700 mb-4 text-center">Distribución de Dinero</h3>
+                                {txs.length > 0 ? (
+                                    <div className="chart-container">
+                                        <canvas ref={chartRef}></canvas>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-20 text-slate-400">
+                                        <i className="ph ph-chart-pie-slice text-5xl mb-2"></i>
+                                        <p>Agrega datos para ver el gráfico</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="pt-2">
+                                {txs.length === 0 ? <p className="text-center text-slate-400 py-10">No hay movimientos registrados</p> : 
+                                    txs.map(tx => (
+                                        <div key={tx.id} className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm mb-3 border border-slate-100">
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'ingreso' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                                    <i className={`ph-fill ${tx.type === 'ingreso' ? 'ph-trend-up' : 'ph-trend-down'} text-xl`}></i>
+                                                </div>
+                                                <div><p className="font-bold text-slate-700">{tx.category}</p><p className="text-xs text-slate-400">{new Date(tx.date).toLocaleDateString()}</p></div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`font-bold ${tx.type === 'ingreso' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                    {tx.type === 'ingreso' ? '+' : '-'}${tx.amount.toLocaleString('es-AR')}
+                                                </span>
+                                                <button onClick={() => delTx(tx.id)} className="text-slate-300 active:text-rose-500"><i className="ph ph-trash text-lg"></i></button>
+                                            </div>
                                         </div>
-                                        <div><p className="font-bold text-slate-700">{tx.category}</p><p className="text-xs text-slate-400">{new Date(tx.date).toLocaleDateString()}</p></div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`font-bold ${tx.type === 'ingreso' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                            {tx.type === 'ingreso' ? '+' : '-'}${tx.amount.toLocaleString('es-AR')}
-                                        </span>
-                                        <button onClick={() => delTx(tx.id)} className="text-slate-300"><i className="ph ph-trash text-lg"></i></button>
-                                    </div>
-                                </div>
-                            ))
-                        }
+                                    ))
+                                }
+                            </div>
+                        )}
                     </div>
 
                     <div className="absolute bottom-6 right-6">
@@ -109,21 +150,20 @@
                         </button>
                     </div>
 
-                    {/* MODAL CORREGIDO CON SELECTOR DE TIPO */}
                     {isMdl && (
                         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4">
                             <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
-                                <h2 className="text-xl font-bold mb-4">{TR.e}</h2>
+                                <h2 className="text-xl font-bold mb-4">Nueva Transacción</h2>
                                 <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
-                                    <button onClick={() => setNewType('gasto')} className={`flex-1 py-2 rounded-lg font-bold transition-all ${newType === 'gasto' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}>{TR.p}</button>
-                                    <button onClick={() => setNewType('ingreso')} className={`flex-1 py-2 rounded-lg font-bold transition-all ${newType === 'ingreso' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}>{TR.o}</button>
+                                    <button onClick={() => setNewType('gasto')} className={`flex-1 py-2 rounded-lg font-bold transition-all ${newType === 'gasto' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-500'}`}>Gasto</button>
+                                    <button onClick={() => setNewType('ingreso')} className={`flex-1 py-2 rounded-lg font-bold transition-all ${newType === 'ingreso' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500'}`}>Ingreso</button>
                                 </div>
                                 <form onSubmit={addTx} className="flex flex-col gap-4">
-                                    <input name="mnt" type="number" step="0.01" placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none border-2 border-transparent focus:border-blue-500" autoFocus required />
-                                    <input name="cat" type="text" placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none border-2 border-transparent focus:border-blue-500" required />
+                                    <input name="mnt" type="number" step="0.01" placeholder="Monto (0.00)" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none border-2 border-transparent focus:border-blue-500" autoFocus required />
+                                    <input name="cat" type="text" placeholder="Concepto (Ej: Sueldo, Super...)" className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none border-2 border-transparent focus:border-blue-500" required />
                                     <div className="flex gap-3 mt-2">
-                                        <button type="button" onClick={() => setIsMdl(false)} className="flex-1 py-4 text-slate-500 font-bold">{TR.j}</button>
-                                        <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl">{TR.k}</button>
+                                        <button type="button" onClick={() => setIsMdl(false)} className="flex-1 py-4 text-slate-500 font-bold">Cancelar</button>
+                                        <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl">Guardar</button>
                                     </div>
                                 </form>
                             </div>
@@ -133,10 +173,7 @@
             );
         };
 
-        const RootApp = () => {
-            const [lng, setLng] = useState('es');
-            return (<CtxLng.Provider value={{ lng, setLng }}><MainApp /></CtxLng.Provider>);
-        };
+        const RootApp = () => <MainApp />;
         ReactDOM.createRoot(document.getElementById('root')).render(<RootApp />);
     </script>
 </body>
