@@ -13,13 +13,9 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script defer src="/_vercel/insights/script.js"></script>
     <style>
         body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen w-screen font-sans">
@@ -28,24 +24,19 @@
         const { useState, useEffect, createContext, useContext, useRef } = React;
         const CtxLng = createContext();
         const TRNS = {
-            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", r: "Distribución de Gastos", s: "Otros", t: "Categoría", u: "Análisis" },
-            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", r: "Expense Distribution", s: "Others", t: "Category", u: "Analysis" },
+            es: { a: "Mis Finanzas", b: "Saldo Total", c: "Ingresos", d: "Gastos", e: "Nueva Transacción", f: "Tipo", g: "Monto", h: "Concepto", i: "Ej: Supermercado", j: "Cancelar", k: "Guardar", l: "Movimientos", m: "registrados", n: "No hay movimientos aún", o: "Ingreso", p: "Gasto", r: "Distribución de Gastos", s: "Otros", u: "Análisis" },
+            en: { a: "My Finances", b: "Total Balance", c: "Income", d: "Expense", e: "New Transaction", f: "Type", g: "Amount", h: "Concept", i: "Ex: Supermarket", j: "Cancel", k: "Save", l: "Movements", m: "registered", n: "No movements yet", o: "Income", p: "Expense", r: "Expense Distribution", s: "Others", u: "Analysis" },
         };
 
         const useLng = () => {
             const ctx = useContext(CtxLng);
-            if (!ctx) { throw new Error('useLng must be used within a CtxLng Provider'); }
             return { TR: TRNS[ctx.lng] || TRNS.es, lng: ctx.lng, setLng: ctx.setLng };
         };
 
         const CmbLng = () => {
             const { lng, setLng } = useLng();
             return (
-                <select
-                    value={lng}
-                    onChange={(e) => setLng(e.target.value)}
-                    className="bg-slate-100 text-slate-600 font-bold rounded-full py-1 px-3 text-sm focus:ring-2 ring-blue-500/20 outline-none"
-                >
+                <select value={lng} onChange={(e) => setLng(e.target.value)} className="bg-slate-100 text-slate-600 font-bold rounded-full py-1 px-3 text-sm outline-none">
                     <option value="es">ES</option>
                     <option value="en">EN</option>
                 </select>
@@ -54,12 +45,11 @@
 
         const CrdBal = ({ inc, exp }) => {
             const { TR } = useLng();
-            const ttl = inc - exp;
             return (
                 <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
                     <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-blue-500 rounded-full opacity-20 blur-xl"></div>
                     <p className="text-slate-400 text-sm font-medium mb-1">{TR.b}</p>
-                    <h1 className="text-4xl font-bold mb-6">${ttl.toLocaleString('es-AR')}</h1>
+                    <h1 className="text-4xl font-bold mb-6">${(inc - exp).toLocaleString('es-AR')}</h1>
                     <div className="flex justify-between items-center">
                         <div>
                             <div className="flex items-center gap-1 text-emerald-400 mb-1">
@@ -98,81 +88,7 @@
                         <span className={`font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {isInc ? '+' : '-'}${parseFloat(item.amount).toLocaleString('es-AR')}
                         </span>
-                        <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
-                            <i className="ph ph-trash text-lg"></i>
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const ChartViz = ({ expenses }) => {
-            const { TR } = useLng();
-            const canvasRef = useRef(null);
-            const chartRef = useRef(null);
-
-            useEffect(() => {
-                if (chartRef.current) chartRef.current.destroy();
-                const grouped = expenses.reduce((acc, tx) => {
-                    const cat = tx.category.trim() || TR.s;
-                    acc[cat] = (acc[cat] || 0) + tx.amount;
-                    return acc;
-                }, {});
-
-                const categories = Object.keys(grouped);
-                const amounts = Object.values(grouped);
-                const colors = ['#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
-
-                if (canvasRef.current && amounts.length > 0) {
-                    chartRef.current = new Chart(canvasRef.current, {
-                        type: 'doughnut',
-                        data: {
-                            labels: categories,
-                            datasets: [{
-                                data: amounts,
-                                backgroundColor: categories.map((_, i) => colors[i % colors.length]),
-                                borderColor: '#fff',
-                                borderWidth: 3,
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-                    });
-                }
-                return () => { if (chartRef.current) chartRef.current.destroy(); };
-            }, [expenses, TR]);
-
-            if (expenses.length === 0) return <div className="text-center py-10 opacity-50"><p className="text-slate-400">{TR.n}</p></div>;
-            return <div className="relative h-64 w-full"><canvas ref={canvasRef} /></div>;
-        };
-
-        const MDLAdd = ({ isOpen, onClose, onAdd }) => {
-            const { TR } = useLng();
-            const [mnt, setMnt] = useState('');
-            const [cat, setCat] = useState('');
-            const [tp, setTp] = useState('gasto');
-            if (!isOpen) return null;
-            const hdlSubmit = (e) => {
-                e.preventDefault();
-                if (!mnt || !cat) return;
-                onAdd({ amount: parseFloat(mnt), category: cat, type: tp });
-                setMnt(''); setCat(''); onClose();
-            };
-            return (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
-                        <h2 className="text-xl font-bold mb-4">{TR.e}</h2>
-                        <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
-                            <button onClick={() => setTp('ingreso')} className={`flex-1 py-2 rounded-lg text-sm font-bold ${tp === 'ingreso' ? 'bg-white shadow text-emerald-600' : 'text-slate-500'}`}>{TR.o}</button>
-                            <button onClick={() => setTp('gasto')} className={`flex-1 py-2 rounded-lg text-sm font-bold ${tp === 'gasto' ? 'bg-white shadow text-rose-600' : 'text-slate-500'}`}>{TR.p}</button>
-                        </div>
-                        <form onSubmit={hdlSubmit} className="flex flex-col gap-4">
-                            <input type="number" value={mnt} onChange={e => setMnt(e.target.value)} placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none" autoFocus />
-                            <input type="text" value={cat} onChange={e => setCat(e.target.value)} placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none" />
-                            <div className="flex gap-3 mt-4">
-                                <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-500 font-bold">{TR.j}</button>
-                                <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl">{TR.k}</button>
-                            </div>
-                        </form>
+                        <button onClick={() => onDelete(item.id)} className="text-slate-300 hover:text-rose-500"><i className="ph ph-trash text-lg"></i></button>
                     </div>
                 </div>
             );
@@ -188,7 +104,6 @@
 
             const addTx = (data) => setTxs([{ ...data, id: Date.now(), date: new Date().toISOString() }, ...txs]);
             const delTx = (id) => setTxs(txs.filter(t => t.id !== id));
-            
             const incTtl = txs.filter(t => t.type === 'ingreso').reduce((acc, curr) => acc + curr.amount, 0);
             const expTtl = txs.filter(t => t.type === 'gasto').reduce((acc, curr) => acc + curr.amount, 0);
 
@@ -197,7 +112,13 @@
                     <header className="p-6 pb-2">
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-2xl font-black text-slate-800">{TR.a}</h1>
-                            <CmbLng />
+                            <div className="flex items-center gap-3">
+                                {/* LINK DE FACEBOOK */}
+                                <a href="https://www.facebook.com/people/Mis-Finanzas/61585304574794/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                    <i className="ph-fill ph-facebook-logo text-xl"></i>
+                                </a>
+                                <CmbLng />
+                            </div>
                         </div>
                         <CrdBal inc={incTtl} exp={expTtl} />
                     </header>
@@ -206,30 +127,37 @@
                         <button onClick={() => setView(1)} className={`pb-2 text-lg font-bold ${view === 1 ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400'}`}>{TR.l}</button>
                     </nav>
                     <div className="flex-1 overflow-y-auto px-6 pb-24">
-                        {view === 0 ? <ChartViz expenses={txs.filter(t => t.type === 'gasto')} /> : 
-                            txs.map(tx => <ItemTx key={tx.id} item={tx} onDelete={delTx} />)
-                        }
+                        {view === 1 ? txs.map(tx => <ItemTx key={tx.id} item={tx} onDelete={delTx} />) : <div className="text-center py-10 opacity-50"><i className="ph ph-chart-pie text-4xl mb-2"></i><p>{TR.n}</p></div>}
                     </div>
                     <div className="absolute bottom-6 right-6">
-                        <button onClick={() => setIsMdl(true)} className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl flex items-center justify-center">
+                        <button onClick={() => setIsMdl(true)} className="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
                             <i className="ph ph-plus text-3xl font-bold"></i>
                         </button>
                     </div>
-                    <MDLAdd isOpen={isMdl} onClose={() => setIsMdl(false)} onAdd={addTx} />
+                    {/* MODAL SIMPLIFICADO */}
+                    {isMdl && (
+                        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4">
+                            <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                                <h2 className="text-xl font-bold mb-4">{TR.e}</h2>
+                                <form onSubmit={(e) => { e.preventDefault(); const m = e.target.mnt.value; const c = e.target.cat.value; if(m && c) { addTx({amount: parseFloat(m), category: c, type: 'gasto'}); setIsMdl(false); } }} className="flex flex-col gap-4">
+                                    <input name="mnt" type="number" placeholder="0.00" className="w-full bg-slate-50 p-4 rounded-xl text-2xl font-bold outline-none" autoFocus />
+                                    <input name="cat" type="text" placeholder={TR.i} className="w-full bg-slate-50 p-4 rounded-xl font-medium outline-none" />
+                                    <div className="flex gap-3">
+                                        <button type="button" onClick={() => setIsMdl(false)} className="flex-1 py-4 text-slate-500 font-bold">{TR.j}</button>
+                                        <button type="submit" className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-xl">{TR.k}</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
 
         const RootApp = () => {
             const [lng, setLng] = useState(localStorage.getItem('appLanguage') || 'es');
-            useEffect(() => { localStorage.setItem('appLanguage', lng); }, [lng]);
-            return (
-                <CtxLng.Provider value={{ lng, setLng }}>
-                    <MainApp />
-                </CtxLng.Provider>
-            );
+            return (<CtxLng.Provider value={{ lng, setLng }}><MainApp /></CtxLng.Provider>);
         };
-
         ReactDOM.createRoot(document.getElementById('root')).render(<RootApp />);
     </script>
 </body>
